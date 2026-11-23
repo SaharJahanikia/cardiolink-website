@@ -3,7 +3,8 @@
 /**
  * In-memory state for the illustrative clinician workspace.
  * It lives in the /workspace layout, so it survives navigation between pages
- * and resets on a full reload. Nothing is sent to a server.
+ * and resets on a full reload. Only the signed-in account (name, email) comes
+ * from the server; the clinical demo state is never saved.
  */
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
@@ -32,6 +33,7 @@ type WorkspaceState = {
 
   profileName: string;
   setProfileName: (name: string) => void;
+  email: string;
   emailNotifications: boolean;
   setEmailNotifications: (on: boolean) => void;
 };
@@ -44,19 +46,19 @@ export function nowStamp() {
   return "14 Oct 2026 · " + new Date().toTimeString().slice(0, 5);
 }
 
-export function WorkspaceProvider({ children }: { children: ReactNode }) {
+export function WorkspaceProvider({ user, children }: { user: { name: string; email: string }; children: ReactNode }) {
   const [reviews, setReviews] = useState<WorkspaceState["reviews"]>({});
   const [readIds, setReadIds] = useState<Set<string>>(
     () => new Set(NOTIFICATIONS.filter((n) => !n.unread).map((n) => n.id)),
   );
   const [dialog, setDialog] = useState<DialogName>(null);
   const [dateRange, setDateRange] = useState<DateRange>(DEFAULT_RANGE);
-  const [profileName, setProfileName] = useState("Dr. Elena Lee");
+  const [profileName, setProfileName] = useState(user.name);
   const [emailNotifications, setEmailNotifications] = useState(true);
 
   const markReviewed = useCallback((id: SignalId, outcome: string, note: string) => {
-    setReviews((prev) => ({ ...prev, [id]: { outcome, note, author: "Dr. Elena Lee", at: nowStamp() } }));
-  }, []);
+    setReviews((prev) => ({ ...prev, [id]: { outcome, note, author: profileName, at: nowStamp() } }));
+  }, [profileName]);
   const markRead = useCallback((id: string) => setReadIds((prev) => new Set(prev).add(id)), []);
   const markAllRead = useCallback(() => setReadIds(new Set(NOTIFICATIONS.map((n) => n.id))), []);
 
@@ -76,10 +78,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setDateRange,
       profileName,
       setProfileName,
+      email: user.email,
       emailNotifications,
       setEmailNotifications,
     }),
-    [reviews, markReviewed, readIds, markRead, markAllRead, dialog, dateRange, profileName, emailNotifications],
+    [reviews, markReviewed, readIds, markRead, markAllRead, dialog, dateRange, profileName, user.email, emailNotifications],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

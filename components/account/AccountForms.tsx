@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-import { CLINICIAN } from "@/lib/demo-data";
+import { useActionState, useState } from "react";
+import { signIn, signUp } from "@/app/account/actions";
 import { Button, ButtonLink, Confirmation, Field } from "../workspace/ui";
 import ws from "../workspace/workspace.module.css";
 import styles from "./account.module.css";
@@ -47,32 +46,37 @@ function useFakeRequest() {
   return { busy, run };
 }
 
-export function SignInForm() {
-  const router = useRouter();
-  const [email, setEmail] = useState(CLINICIAN.email);
-  const [password, setPassword] = useState("illustrative-demo");
-  const [show, setShow] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const { busy, run } = useFakeRequest();
+function FormMessage({ text }: { text?: string }) {
+  if (!text) return null;
+  return (
+    <p role="alert" className={ws.error} style={{ margin: 0 }}>
+      {text}
+    </p>
+  );
+}
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    const next: Record<string, string> = {};
-    if (!EMAIL.test(email)) next.email = "Enter a valid work email.";
-    if (!password) next.password = "Enter your password.";
-    setErrors(next);
-    if (Object.keys(next).length === 0) run(() => router.push("/workspace/patients"));
-  };
+export function SignInForm({ next = "" }: { next?: string }) {
+  const [state, action, pending] = useActionState(signIn, undefined);
+  const [show, setShow] = useState(false);
+  const errors = state?.errors ?? {};
 
   return (
-    <form className={ws.stack16} onSubmit={submit} noValidate>
-      <Field label="Work email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
+    <form className={ws.stack16} action={action} noValidate>
+      <input type="hidden" name="next" value={next} />
+      <FormMessage text={state?.message} />
+      <Field
+        label="Work email"
+        name="email"
+        type="email"
+        autoComplete="username"
+        defaultValue={state?.values?.email ?? ""}
+        error={errors.email}
+      />
       <Field
         label="Password"
+        name="password"
         type={show ? "text" : "password"}
         autoComplete="current-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
         error={errors.password}
       />
       <button type="button" className={styles.showPassword} onClick={() => setShow((s) => !s)} aria-pressed={show}>
@@ -81,10 +85,13 @@ export function SignInForm() {
       <Link href="/account/forgot-password" className={styles.link}>
         Forgot password?
       </Link>
-      <Button type="submit" className={styles.full} disabled={busy}>
-        {busy ? "Signing in…" : "Sign in"}
+      <Button type="submit" className={styles.full} disabled={pending}>
+        {pending ? "Signing in…" : "Sign in"}
       </Button>
       <p className={ws.muted11}>By signing in you agree to the Terms of service and Privacy notice.</p>
+      <Link href="/account/sign-up" className={styles.link}>
+        New to CardioLink? Create an account
+      </Link>
       <Link href="/account" className={styles.link}>
         Not a clinician? Switch account type
       </Link>
@@ -92,8 +99,54 @@ export function SignInForm() {
   );
 }
 
+export function SignUpForm() {
+  const [state, action, pending] = useActionState(signUp, undefined);
+  const [show, setShow] = useState(false);
+  const errors = state?.errors ?? {};
+
+  return (
+    <form className={ws.stack16} action={action} noValidate>
+      <FormMessage text={state?.message} />
+      <Field label="Full name" name="name" autoComplete="name" defaultValue={state?.values?.name ?? ""} error={errors.name} />
+      <Field
+        label="Work email"
+        name="email"
+        type="email"
+        autoComplete="username"
+        defaultValue={state?.values?.email ?? ""}
+        error={errors.email}
+      />
+      <Field
+        label="Password"
+        name="password"
+        type={show ? "text" : "password"}
+        autoComplete="new-password"
+        error={errors.password}
+        hint="At least 12 characters."
+      />
+      <Field
+        label="Confirm password"
+        name="confirm"
+        type={show ? "text" : "password"}
+        autoComplete="new-password"
+        error={errors.confirm}
+      />
+      <button type="button" className={styles.showPassword} onClick={() => setShow((s) => !s)} aria-pressed={show}>
+        {show ? "Hide passwords" : "Show passwords"}
+      </button>
+      <Button type="submit" className={styles.full} disabled={pending}>
+        {pending ? "Creating account…" : "Create account"}
+      </Button>
+      <p className={ws.muted11}>By creating an account you agree to the Terms of service and Privacy notice.</p>
+      <Link href="/account/sign-in" className={styles.link}>
+        Already have an account? Sign in
+      </Link>
+    </form>
+  );
+}
+
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState(CLINICIAN.email);
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const { busy, run } = useFakeRequest();
