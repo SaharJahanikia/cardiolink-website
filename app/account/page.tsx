@@ -17,6 +17,9 @@ export default function ChooseAccountPage() {
         <p className={ws.muted12}>Review patients, assess trends and coordinate care.</p>
         <span className={styles.link}>Clinician sign in ›</span>
       </Link>
+      <Link href="/account/sign-up" className={styles.link}>
+        New clinician? Create an account
+      </Link>
       <PatientSignInNote />
       <p className={ws.muted12}>Patient accounts are invite-only. Ask your clinician for an invitation.</p>
       <a href="mailto:support@example.test" className={styles.link}>

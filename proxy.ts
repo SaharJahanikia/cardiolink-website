@@ -1,10 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { readSessionToken, SESSION_COOKIE } from "@/lib/auth";
+import { SESSION_COOKIE } from "@/lib/auth-cookie";
 
-/** The full demo is invite-only: send anyone without a valid session to sign in first. */
+/**
+ * The full demo needs an account. Without a session cookie, go straight to sign-in and come back after.
+ * This only checks that the cookie exists; the layouts check it against the database.
+ */
 export function proxy(request: NextRequest) {
-  const session = readSessionToken(request.cookies.get(SESSION_COOKIE)?.value);
-  if (session) return NextResponse.next();
+  if (request.cookies.has(SESSION_COOKIE)) return NextResponse.next();
 
   const url = request.nextUrl.clone();
   url.pathname = "/account/sign-in";

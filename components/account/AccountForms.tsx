@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-import { CLINICIAN } from "@/lib/demo-data";
+import { useActionState, useState } from "react";
+import { signIn, signUp } from "@/app/account/actions";
 import { Button, ButtonLink, Confirmation, Field } from "../workspace/ui";
 import ws from "../workspace/workspace.module.css";
 import styles from "./account.module.css";
@@ -47,59 +46,37 @@ function useFakeRequest() {
   return { busy, run };
 }
 
-export function SignInForm({ next }: { next: string }) {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function FormMessage({ text }: { text?: string }) {
+  if (!text) return null;
+  return (
+    <p role="alert" className={ws.error} style={{ margin: 0 }}>
+      {text}
+    </p>
+  );
+}
+
+export function SignInForm({ next = "" }: { next?: string }) {
+  const [state, action, pending] = useActionState(signIn, undefined);
   const [show, setShow] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [formError, setFormError] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (busy) return;
-    const fieldErrors: Record<string, string> = {};
-    if (!EMAIL.test(email)) fieldErrors.email = "Enter a valid work email.";
-    if (!password) fieldErrors.password = "Enter your password.";
-    setErrors(fieldErrors);
-    setFormError("");
-    if (Object.keys(fieldErrors).length > 0) return;
-
-    setBusy(true);
-    try {
-      const res = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (res.ok) {
-        router.replace(next);
-        router.refresh();
-        return;
-      }
-      const data = await res.json().catch(() => ({}));
-      setFormError(data.error ?? "Sign-in failed. Please try again.");
-    } catch {
-      setFormError("We couldn’t reach the server. Check your connection and try again.");
-    }
-    setBusy(false);
-  };
+  const errors = state?.errors ?? {};
 
   return (
-    <form className={ws.stack16} onSubmit={submit} noValidate>
-      {formError && (
-        <p role="alert" className={ws.error} style={{ fontSize: 13 }}>
-          {formError}
-        </p>
-      )}
-      <Field label="Work email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} error={errors.email} />
+    <form className={ws.stack16} action={action} noValidate>
+      <input type="hidden" name="next" value={next} />
+      <FormMessage text={state?.message} />
+      <Field
+        label="Work email"
+        name="email"
+        type="email"
+        autoComplete="username"
+        defaultValue={state?.values?.email ?? ""}
+        error={errors.email}
+      />
       <Field
         label="Password"
+        name="password"
         type={show ? "text" : "password"}
         autoComplete="current-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
         error={errors.password}
       />
       <button type="button" className={styles.showPassword} onClick={() => setShow((s) => !s)} aria-pressed={show}>
@@ -108,22 +85,68 @@ export function SignInForm({ next }: { next: string }) {
       <Link href="/account/forgot-password" className={styles.link}>
         Forgot password?
       </Link>
-      <Button type="submit" className={styles.full} disabled={busy}>
-        {busy ? "Signing in…" : "Sign in"}
+      <Button type="submit" className={styles.full} disabled={pending}>
+        {pending ? "Signing in…" : "Sign in"}
       </Button>
-      <p className={ws.muted12}>
-        Demo access is by invitation. Don’t have a login yet?{" "}
-        <Link href="/demo" className={styles.link}>
-          Request a demo
-        </Link>{" "}
-        and our team will set one up for you.
-      </p>
+      <p className={ws.muted11}>By signing in you agree to the Terms of service and Privacy notice.</p>
+      <Link href="/account/sign-up" className={styles.link}>
+        New to CardioLink? Create an account
+      </Link>
+      <Link href="/account" className={styles.link}>
+        Not a clinician? Switch account type
+      </Link>
+    </form>
+  );
+}
+
+export function SignUpForm() {
+  const [state, action, pending] = useActionState(signUp, undefined);
+  const [show, setShow] = useState(false);
+  const errors = state?.errors ?? {};
+
+  return (
+    <form className={ws.stack16} action={action} noValidate>
+      <FormMessage text={state?.message} />
+      <Field label="Full name" name="name" autoComplete="name" defaultValue={state?.values?.name ?? ""} error={errors.name} />
+      <Field
+        label="Work email"
+        name="email"
+        type="email"
+        autoComplete="username"
+        defaultValue={state?.values?.email ?? ""}
+        error={errors.email}
+      />
+      <Field
+        label="Password"
+        name="password"
+        type={show ? "text" : "password"}
+        autoComplete="new-password"
+        error={errors.password}
+        hint="At least 12 characters."
+      />
+      <Field
+        label="Confirm password"
+        name="confirm"
+        type={show ? "text" : "password"}
+        autoComplete="new-password"
+        error={errors.confirm}
+      />
+      <button type="button" className={styles.showPassword} onClick={() => setShow((s) => !s)} aria-pressed={show}>
+        {show ? "Hide passwords" : "Show passwords"}
+      </button>
+      <Button type="submit" className={styles.full} disabled={pending}>
+        {pending ? "Creating account…" : "Create account"}
+      </Button>
+      <p className={ws.muted11}>By creating an account you agree to the Terms of service and Privacy notice.</p>
+      <Link href="/account/sign-in" className={styles.link}>
+        Already have an account? Sign in
+      </Link>
     </form>
   );
 }
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState(CLINICIAN.email);
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const { busy, run } = useFakeRequest();

@@ -9,3 +9,6 @@ next-env.d.ts
 
 # Local demo-request submissions (contain names/emails); written by /api/demo-requests
 dev-data/
+
+# Local account database
+data/
