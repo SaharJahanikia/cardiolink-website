@@ -7,5 +7,8 @@ next-env.d.ts
 .env*.local
 .claude/
 
+# Local demo-request submissions (contain names/emails); written by /api/demo-requests
+dev-data/
+
 # Local account database
 data/
