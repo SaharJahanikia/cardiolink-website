@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import DemoVideoClient from "./DemoVideoClient";
 
