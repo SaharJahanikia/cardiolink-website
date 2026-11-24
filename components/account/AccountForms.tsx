@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
-import { signIn, signUp } from "@/app/account/actions";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useState } from "react";
+import { EMAIL, getCurrentUser, signIn, signUp } from "@/lib/local-accounts";
 import { Button, ButtonLink, Confirmation, Field } from "../workspace/ui";
 import ws from "../workspace/workspace.module.css";
 import styles from "./account.module.css";
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** The patient portal (430 px designs) isn't built yet, so this card explains instead of linking. */
 export function PatientSignInNote() {
@@ -46,6 +46,23 @@ function useFakeRequest() {
   return { busy, run };
 }
 
+type FormState = { errors?: Record<string, string>; message?: string; values?: Record<string, string> } | undefined;
+
+const field = (form: FormData, key: string) => String(form.get(key) ?? "");
+
+/** Only follow same-site paths after sign-in, never an absolute URL. */
+function safeNext(value: string) {
+  return value.startsWith("/") && !value.startsWith("//") ? value : "/workspace/patients";
+}
+
+/** Someone already signed in on this browser skips the account forms. */
+function useRedirectIfSignedIn() {
+  const router = useRouter();
+  useEffect(() => {
+    if (getCurrentUser()) router.replace("/workspace/patients");
+  }, [router]);
+}
+
 function FormMessage({ text }: { text?: string }) {
   if (!text) return null;
   return (
@@ -55,14 +72,23 @@ function FormMessage({ text }: { text?: string }) {
   );
 }
 
-export function SignInForm({ next = "" }: { next?: string }) {
-  const [state, action, pending] = useActionState(signIn, undefined);
+export function SignInForm() {
+  const router = useRouter();
+  useRedirectIfSignedIn();
+  const [state, action, pending] = useActionState(async (_prev: FormState, form: FormData): Promise<FormState> => {
+    const email = field(form, "email");
+    const result = await signIn({ email, password: field(form, "password") });
+    if (result.ok) {
+      router.push(safeNext(new URLSearchParams(window.location.search).get("next") ?? ""));
+      return undefined;
+    }
+    return { errors: result.errors, message: result.message, values: { email } };
+  }, undefined);
   const [show, setShow] = useState(false);
   const errors = state?.errors ?? {};
 
   return (
     <form className={ws.stack16} action={action} noValidate>
-      <input type="hidden" name="next" value={next} />
       <FormMessage text={state?.message} />
       <Field
         label="Work email"
@@ -100,7 +126,18 @@ export function SignInForm({ next = "" }: { next?: string }) {
 }
 
 export function SignUpForm() {
-  const [state, action, pending] = useActionState(signUp, undefined);
+  const router = useRouter();
+  useRedirectIfSignedIn();
+  const [state, action, pending] = useActionState(async (_prev: FormState, form: FormData): Promise<FormState> => {
+    const name = field(form, "name");
+    const email = field(form, "email");
+    const result = await signUp({ name, email, password: field(form, "password"), confirm: field(form, "confirm") });
+    if (result.ok) {
+      router.push("/workspace/patients");
+      return undefined;
+    }
+    return { errors: result.errors, message: result.message, values: { name, email } };
+  }, undefined);
   const [show, setShow] = useState(false);
   const errors = state?.errors ?? {};
 
