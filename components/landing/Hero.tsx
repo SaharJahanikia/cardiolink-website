@@ -142,7 +142,7 @@ export function Hero() {
               </Link>
             ))}
           </div>
-          <ButtonLink href="/account/sign-in" variant="primary" icon="arrow-right">
+          <ButtonLink href="/demo-video" variant="primary" icon="arrow-right">
             Request a demo
           </ButtonLink>
         </nav>
@@ -158,7 +158,7 @@ export function Hero() {
             care-team review into one thoughtful cardiology workspace.
           </p>
           <div className={styles.heroActions}>
-            <ButtonLink href="/account/sign-in" variant="primary" icon="arrow-right">
+            <ButtonLink href="/demo-video" variant="primary" icon="arrow-right">
               Request a demo
             </ButtonLink>
             <ButtonLink href="#how-it-works" variant="secondary" icon="arrow-right-1">
