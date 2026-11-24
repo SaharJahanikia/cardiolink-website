@@ -1,3 +1,4 @@
+
 export function DemoInvitation() {
   return (
     <section
@@ -6,6 +7,7 @@ export function DemoInvitation() {
         background: "#102b4e",
         padding: "60px 8%",
         color: "white",
+        fontFamily: "inherit",
       }}
     >
       <div style={{ maxWidth: "650px", margin: "auto" }}>
@@ -26,6 +28,7 @@ export function DemoInvitation() {
             display: "grid",
             gap: "16px",
             marginTop: "25px",
+            fontFamily: "inherit",
           }}
         >
           <label>
@@ -72,6 +75,8 @@ export function DemoInvitation() {
               border: "none",
               borderRadius: "8px",
               fontWeight: "bold",
+              fontFamily: "inherit",
+              fontSize: "15px",
               cursor: "pointer",
             }}
           >
@@ -101,8 +106,5 @@ const fieldStyle = {
   background: "white",
   color: "#102b4e",
   fontSize: "15px",
+  fontFamily: "inherit",
 };
-
-
-
-
