@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className={inter.className}>
       <body>
         {children}
-        {createElement("elevenlabs-convai", { "agent-id": "agent_4001m762q675e39v6khaw1b347jn" })}
+        {createElement("elevenlabs-convai", { "agent-id": "agent_5501kvng87enfj6sfx8jwpw3tcga" })}
         <Script src="https://unpkg.com/@elevenlabs/convai-widget-embed" strategy="afterInteractive" />
       </body>
     </html>
