@@ -6,7 +6,7 @@ const navLinks = [
   { label: "How it works", href: "#how-it-works" },
   { label: "For patients", href: "#for-patients" },
   { label: "FAQs", href: "#faqs" },
-  { label: "Patient demo", href: "/demo/clinician" },
+  { label: "Patient demo", href: "/account/sign-in" },
 ];
 
 const metrics = [
@@ -142,7 +142,7 @@ export function Hero() {
               </Link>
             ))}
           </div>
-          <ButtonLink href="#request-a-demo" variant="primary" icon="arrow-right">
+          <ButtonLink href="/account/sign-in" variant="primary" icon="arrow-right">
             Request a demo
           </ButtonLink>
         </nav>
@@ -158,7 +158,7 @@ export function Hero() {
             care-team review into one thoughtful cardiology workspace.
           </p>
           <div className={styles.heroActions}>
-            <ButtonLink href="#request-a-demo" variant="primary" icon="arrow-right">
+            <ButtonLink href="/account/sign-in" variant="primary" icon="arrow-right">
               Request a demo
             </ButtonLink>
             <ButtonLink href="#how-it-works" variant="secondary" icon="arrow-right-1">
