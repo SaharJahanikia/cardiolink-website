@@ -58,8 +58,17 @@ function safeNext(value: string) {
 /** Someone already signed in on this browser skips the account forms. */
 function useRedirectIfSignedIn() {
   const router = useRouter();
+
   useEffect(() => {
-    if (getCurrentUser()) router.replace("/workspace/patients");
+    if (getCurrentUser()) {
+      const next = new URLSearchParams(window.location.search).get("next");
+      const destination =
+        next && next.startsWith("/") && !next.startsWith("//")
+          ? next
+          : "/workspace/patients";
+
+      router.replace(destination);
+    }
   }, [router]);
 }
 

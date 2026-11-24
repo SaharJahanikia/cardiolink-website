@@ -20,7 +20,7 @@ const columns = [
   {
     title: "Get in touch",
     links: [
-      { label: "Request a demo", href: "/demo" },
+      { label: "Request a demo", href: "/demo-video" },
       { label: "Questions & answers", href: "/#faqs" },
       { label: "Contact the team", href: "/demo" },
     ],
