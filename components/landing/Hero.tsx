@@ -142,7 +142,7 @@ export function Hero() {
               </Link>
             ))}
           </div>
-          <ButtonLink href="/demo-video" variant="primary" icon="arrow-right">
+          <ButtonLink href="/account/sign-in?next=/demo-video" variant="primary" icon="arrow-right">
             Request a demo
           </ButtonLink>
         </nav>
