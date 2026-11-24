@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { signOut, updateProfileName } from "@/app/account/actions";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { signOut, updateProfileName } from "@/lib/local-accounts";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
 import { Button, Card, Field, PageHeader, TextLink, styles } from "@/components/workspace/ui";
 
 export default function SettingsPage() {
   const { profileName, setProfileName, email, emailNotifications, setEmailNotifications } = useWorkspace();
-  const [saving, startSaving] = useTransition();
+  const router = useRouter();
   const [name, setName] = useState(profileName);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
@@ -25,12 +26,10 @@ export default function SettingsPage() {
               const trimmed = name.trim();
               if (trimmed.length < 2) return setError("Enter your full name.");
               setError("");
-              startSaving(async () => {
-                const result = await updateProfileName(trimmed);
-                if (!result.ok) return setError(result.error ?? "Couldn’t save your name.");
-                setProfileName(trimmed);
-                setSaved(true);
-              });
+              const result = updateProfileName(trimmed);
+              if (!result.ok) return setError(result.error ?? "Couldn’t save your name.");
+              setProfileName(trimmed);
+              setSaved(true);
             }}
           >
             <h2 className={styles.h2}>Profile</h2>
@@ -46,8 +45,8 @@ export default function SettingsPage() {
             <Field label="Work email" value={email} readOnly hint="Contact your administrator to change your verified email." />
             <Field label="Role" value="Clinician · Cardiology" readOnly hint="Managed by your organisation" />
             <div className={styles.row}>
-              <Button type="submit" disabled={saving || name.trim() === profileName}>
-                {saving ? "Saving…" : "Save changes"}
+              <Button type="submit" disabled={name.trim() === profileName}>
+                Save changes
               </Button>
               {saved && (
                 <span role="status" className={styles.muted12} style={{ color: "var(--teal-text)", fontWeight: 600 }}>
@@ -86,12 +85,15 @@ export default function SettingsPage() {
           <div className={styles.cardFlat}>
             <div className={styles.stack4}>
               <h3 className={styles.h3}>Session</h3>
-              <p className={styles.muted11}>Signed in on this browser</p>
-              <form action={signOut}>
-                <button type="submit" className={styles.textLink}>
-                  Sign out <span aria-hidden="true">›</span>
-                </button>
-              </form>
+              <p className={styles.muted11}>Signed in on this browser · Demo accounts are saved only in this browser</p>
+              <TextLink
+                onClick={() => {
+                  signOut();
+                  router.push("/account/signed-out");
+                }}
+              >
+                Sign out
+              </TextLink>
             </div>
           </div>
           <p className={styles.muted11}>Changes affect your account, not your patients’ care plans.</p>
