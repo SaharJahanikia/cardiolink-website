@@ -12,13 +12,15 @@ export function DemoInvitation() {
     >
       <div style={{ maxWidth: "650px", margin: "auto" }}>
         <h2 style={{ fontSize: "36px", fontWeight: 600 }}>
-          Get Started with CardioLink
+          Enjoyed the CardioLink Demo?
         </h2>
 
-        <p style={{ marginTop: "12px", lineHeight: 1.5 }}>
-          Interested in CardioLink? Request free
-          access. Our team will review your request
-          and contact you about getting started.
+        <p style={{ marginTop: "12px", lineHeight: 1.6 }}>
+          Interested in becoming part of CardioLink?
+          If you enjoyed exploring our demo and would
+          like to subscribe, fill out the sign-up form
+          below. Our team will contact you with the
+          next steps to get started.
         </p>
 
         <form
@@ -63,14 +65,13 @@ export function DemoInvitation() {
             fontSize: "15px",
             cursor: "pointer",
           }}>
-            Submit Sign-Up Request →
+            Sign Up to Subscribe →
           </button>
 
           <p style={{ fontSize: "13px", lineHeight: 1.5 }}>
-            Our team will review your request and
-            contact you about account access.
-            Submitting does not automatically
-            create an account.
+            Thank you for your interest in CardioLink!
+            Our team will contact you regarding
+            subscription and account access.
           </p>
         </form>
       </div>
